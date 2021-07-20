@@ -45,20 +45,10 @@ Other Style Guides
   1. [Naming Conventions](#naming-conventions)
   1. [Accessors](#accessors)
   1. [Events](#events)
-  1. [jQuery](#jquery)
   1. [ECMAScript 5 Compatibility](#ecmascript-5-compatibility)
   1. [ECMAScript 6+ (ES 2015+) Styles](#ecmascript-6-es-2015-styles)
   1. [Standard Library](#standard-library)
-  1. [Testing](#testing)
-  1. [Performance](#performance)
-  1. [Resources](#resources)
-  1. [In the Wild](#in-the-wild)
-  1. [Translation](#translation)
-  1. [The JavaScript Style Guide Guide](#the-javascript-style-guide-guide)
-  1. [Chat With Us About JavaScript](#chat-with-us-about-javascript)
-  1. [Contributors](#contributors)
-  1. [License](#license)
-  1. [Amendments](#amendments)
+
 
 ## Types
 
@@ -1977,7 +1967,7 @@ Other Style Guides
     ```
 
   <a name="comparison--shortcuts"></a><a name="15.3"></a>
-  - [15.3](#comparison--shortcuts) Use shortcuts for booleans, but explicit comparisons for strings and numbers.
+  - [15.3](#comparison--shortcuts) Use comparison shortcuts when using `if`, `for`, and `while` operators, but only for `boolean` when using the variable assignment. 
 
     ```javascript
     // bad
@@ -1991,24 +1981,40 @@ Other Style Guides
     }
 
     // bad
+    if (name !== '') {
+      // ...
+    }
+    
+    // good
     if (name) {
       // ...
     }
 
     // good
-    if (name !== '') {
+    if (collection.length) {
+      // ...
+    }
+    
+    // also good
+    if (collection.length > 0) {
       // ...
     }
 
     // bad
-    if (collection.length) {
+    if (user.name !== '') {
+      // ...
+    }
+    
+    // good
+    if (user.name) {
       // ...
     }
 
-    // good
-    if (collection.length > 0) {
-      // ...
-    }
+    // bad 
+    const isAdminUser = user.name && user.isAdmin;
+    
+    // good 
+    const isAdminUser = user.name.length > 0 && user.isAdmin;
     ```
 
   <a name="comparison--moreinfo"></a><a name="15.4"></a>

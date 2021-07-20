@@ -7,7 +7,7 @@ This style guide is mostly based on the standards that are currently prevalent i
 ## Table of Contents
 
   1. [Basic Rules](#basic-rules)
-  1. [Class vs `React.createClass` vs stateless](#class-vs-reactcreateclass-vs-stateless)
+  1. [Class vs functional components](#class-vs-functional-components)
   1. [Mixins](#mixins)
   1. [Naming](#naming)
   1. [Declaration](#declaration)
@@ -20,6 +20,7 @@ This style guide is mostly based on the standards that are currently prevalent i
   1. [Tags](#tags)
   1. [Methods](#methods)
   1. [Ordering](#ordering)
+  1. [Redux](#redux)
   1. [`isMounted`](#ismounted)
 
 ## Basic Rules
@@ -30,49 +31,31 @@ This style guide is mostly based on the standards that are currently prevalent i
   - Do not use `React.createElement` unless you’re initializing the app from a file that is not JSX.
   - [`react/forbid-prop-types`](https://github.com/yannickcr/eslint-plugin-react/blob/master/docs/rules/forbid-prop-types.md) will allow `arrays` and `objects` only if it is explicitly noted what `array` and `object` contains, using `arrayOf`, `objectOf`, or `shape`.
 
-## Class vs `React.createClass` vs stateless
 
-  - If you have internal state and/or refs, prefer `class extends React.Component` over `React.createClass`. eslint: [`react/prefer-es6-class`](https://github.com/yannickcr/eslint-plugin-react/blob/master/docs/rules/prefer-es6-class.md) [`react/prefer-stateless-function`](https://github.com/yannickcr/eslint-plugin-react/blob/master/docs/rules/prefer-stateless-function.md)
+## Class vs functional components
 
-    ```jsx
-    // bad
-    const Listing = React.createClass({
-      // ...
-      render() {
-        return <div>{this.state.hello}</div>;
-      }
-    });
+  - Prefer functional components over class components for each case except when you need to extend it with exernal component, e.g. from external library
+    
+  > Why? Functional components have hooks infrastructure, during the time it's more and more custom team hooks which may be re-used.     
 
-    // good
+ ```jsx
+     // bad
     class Listing extends React.Component {
       // ...
       render() {
         return <div>{this.state.hello}</div>;
       }
     }
-    ```
-
-    And if you don’t have state or refs, prefer normal functions (not arrow functions) over classes:
-
-    ```jsx
-    // bad
-    class Listing extends React.Component {
-      render() {
-        return <div>{this.props.hello}</div>;
-      }
-    }
-
-    // bad (relying on function name inference is discouraged)
-    const Listing = ({ hello }) => (
-      <div>{hello}</div>
-    );
 
     // good
-    function Listing({ hello }) {
-      return <div>{hello}</div>;
+    const Listing = () => {
+      // ...
+      return <div>{this.state.hello}</div>;
     }
-    ```
+  ```
+    
 
+    
 ## Mixins
 
   - [Do not use mixins](https://facebook.github.io/react/blog/2016/07/13/mixins-considered-harmful.html).
@@ -81,7 +64,7 @@ This style guide is mostly based on the standards that are currently prevalent i
 
 ## Naming
 
-  - **Extensions**: Use `.jsx` extension for React components. eslint: [`react/jsx-filename-extension`](https://github.com/yannickcr/eslint-plugin-react/blob/master/docs/rules/jsx-filename-extension.md)
+  - **Extensions**: Use `.tsx` extension for React components. eslint: [`react/jsx-filename-extension`](https://github.com/yannickcr/eslint-plugin-react/blob/master/docs/rules/jsx-filename-extension.md)
   - **Filename**: Use PascalCase for filenames. E.g., `ReservationCard.jsx`.
   - **Reference Naming**: Use PascalCase for React components and camelCase for their instances. eslint: [`react/jsx-pascal-case`](https://github.com/yannickcr/eslint-plugin-react/blob/master/docs/rules/jsx-pascal-case.md)
 
@@ -99,17 +82,17 @@ This style guide is mostly based on the standards that are currently prevalent i
     const reservationItem = <ReservationCard />;
     ```
 
-  - **Component Naming**: Use the filename as the component name. For example, `ReservationCard.jsx` should have a reference name of `ReservationCard`. However, for root components of a directory, use `index.jsx` as the filename and use the directory name as the component name:
+  - **Component Naming**: Use the filename as the component name. For example, `ReservationCard.jsx` should have a reference name of `ReservationCard`. 
 
     ```jsx
     // bad
-    import Footer from './Footer/Footer';
-
+    import Footer from './TableFooter/TableFooter';
+    
     // bad
-    import Footer from './Footer/index';
+    import { Footer } from './TableFooter/TableFooter';
 
     // good
-    import Footer from './Footer';
+    import Footer from './Footer/Footer';
     ```
 
   - **Higher-order Component Naming**: Use a composite of the higher-order component’s name and the passed-in component’s name as the `displayName` on the generated component. For example, the higher-order component `withFoo()`, when passed a component `Bar` should produce a component with a `displayName` of `withFoo(Bar)`.
@@ -305,21 +288,24 @@ This style guide is mostly based on the standards that are currently prevalent i
     />
     ```
 
-  - Omit the value of the prop when it is explicitly `true`. eslint: [`react/jsx-boolean-value`](https://github.com/yannickcr/eslint-plugin-react/blob/master/docs/rules/jsx-boolean-value.md)
+  - Specify the value of the prop even if it is explicitly `true`. 
+    
+    > Why? It can be confused with the ES6 object shorthand {foo} which is short for {foo: foo} rather than {foo: true}
 
     ```jsx
+  
     // bad
-    <Foo
-      hidden={true}
-    />
-
-    // good
     <Foo
       hidden
     />
 
-    // good
+    // bad
     <Foo hidden />
+    
+    // good
+    <Foo
+      hidden={true}
+    />
     ```
 
   - Always include an `alt` prop on `<img>` tags. If the image is presentational, `alt` can be an empty string or the `<img>` must have `role="presentation"`. eslint: [`jsx-a11y/alt-text`](https://github.com/evcohen/eslint-plugin-jsx-a11y/blob/master/docs/rules/alt-text.md)
@@ -465,7 +451,7 @@ We don’t recommend using indexes for keys if the order of items may change.
   ```
 
   Notes for use:
-  Filter out unnecessary props when possible. Also, use [prop-types-exact](https://www.npmjs.com/package/prop-types-exact) to help prevent bugs.
+  Filter out unnecessary props when possible.
 
   ```jsx
   // bad
@@ -655,6 +641,16 @@ We don’t recommend using indexes for keys if the order of items may change.
 
 ## Ordering
 
+  - Ordering for functional components:
+
+  1. props spreading
+  1. initiate dispatch
+  1. select values from redux (useSelector)
+  1. state declaration
+  1. component functions and values
+  1. effects (effects probably will use component functions as dependencies)
+
+
   - Ordering for `class extends React.Component`:
 
   1. optional `static` methods
@@ -672,38 +668,6 @@ We don’t recommend using indexes for keys if the order of items may change.
   1. *getter methods for `render`* like `getSelectReason()` or `getFooterContent()`
   1. *optional render methods* like `renderNavigation()` or `renderProfilePicture()`
   1. `render`
-
-  - How to define `propTypes`, `defaultProps`, `contextTypes`, etc...
-
-    ```jsx
-    import React from 'react';
-    import PropTypes from 'prop-types';
-
-    const propTypes = {
-      id: PropTypes.number.isRequired,
-      url: PropTypes.string.isRequired,
-      text: PropTypes.string,
-    };
-
-    const defaultProps = {
-      text: 'Hello World',
-    };
-
-    class Link extends React.Component {
-      static methodsAreOk() {
-        return true;
-      }
-
-      render() {
-        return <a href={this.props.url} data-id={this.props.id}>{this.props.text}</a>;
-      }
-    }
-
-    Link.propTypes = propTypes;
-    Link.defaultProps = defaultProps;
-
-    export default Link;
-    ```
 
   - Ordering for `React.createClass`: eslint: [`react/sort-comp`](https://github.com/yannickcr/eslint-plugin-react/blob/master/docs/rules/sort-comp.md)
 
@@ -728,6 +692,12 @@ We don’t recommend using indexes for keys if the order of items may change.
   1. *getter methods for `render`* like `getSelectReason()` or `getFooterContent()`
   1. *optional render methods* like `renderNavigation()` or `renderProfilePicture()`
   1. `render`
+
+## Redux
+  
+  - Use redux hooks to connect a component to store instead of containers
+  - Add selectors to get values from store
+  - Use `reselect` to create a selector which use more than one store value and additional calculations. 
 
 ## `isMounted`
 

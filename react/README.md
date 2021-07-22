@@ -50,7 +50,7 @@ This style guide is mostly based on the standards that are currently prevalent i
     // good
     const Listing = () => {
       // ...
-      return <div>{this.state.hello}</div>;
+      return <div>{hello}</div>;
     }
   ```
     
@@ -391,28 +391,22 @@ We don’t recommend using indexes for keys if the order of items may change.
 
   ```jsx
   // bad
-  function SFC({ foo, bar, children }) {
-    return <div>{foo}{bar}{children}</div>;
+  interface ComponentProps {
+    foo: number;
+    bar?: string;
+  } 
+  function Component({ foo, bar}) {
+    return <div>{foo}{bar}</div>;
   }
-  SFC.propTypes = {
-    foo: PropTypes.number.isRequired,
-    bar: PropTypes.string,
-    children: PropTypes.node,
-  };
 
   // good
-  function SFC({ foo, bar, children }) {
-    return <div>{foo}{bar}{children}</div>;
+  interface ComponentProps {
+    foo: number;
+    bar?: string;
+  } 
+  function Component({ foo, bar = ''}) {
+    return <div>{foo}{bar}</div>;
   }
-  SFC.propTypes = {
-    foo: PropTypes.number.isRequired,
-    bar: PropTypes.string,
-    children: PropTypes.node,
-  };
-  SFC.defaultProps = {
-    bar: '',
-    children: null,
-  };
   ```
 
   - Use spread props sparingly.
@@ -437,7 +431,7 @@ We don’t recommend using indexes for keys if the order of items may change.
   }
   ```
 
-  - Spreading objects with known, explicit props. This can be particularly useful when testing React components with Mocha’s beforeEach construct.
+  - Spreading objects with known, explicit props. This can be particularly useful when testing React components with Jest’s beforeEach construct.
 
   ```jsx
   export default function Foo {
@@ -695,9 +689,25 @@ We don’t recommend using indexes for keys if the order of items may change.
 
 ## Redux
   
+  # Selectors
+
   - Use redux hooks to connect a component to store instead of containers
   - Add selectors to get values from store
   - Use `reselect` to create a selector which use more than one store value and additional calculations. 
+  - Split simple selectors and re-selectors into different files to avoid circular dependencies.
+  - Add additional memoization for re-selector if you need to pass params. 
+    > Why? Otherwise it will return new createSelector result everytime and reselect won't work as expected 
+    ```jsx
+    // bad
+    export const getOpenedSectionGroups = (section: CollectionsTreeSections) =>
+      createSelector([getOpenedSectionsGroups], (openedSectionsGroups) => openedSectionsGroups[section] || []);
+
+    // good
+    export const getOpenedSectionGroups = defaultMemoize((section: CollectionsTreeSections) =>
+      createSelector([getOpenedSectionsGroups], (openedSectionsGroups) => openedSectionsGroups[section] || [])
+    );
+    // P.S. do not forget about memo type, reselect uses simple (a === b) condition in memo function, it will not work for objects
+    ```
 
 ## `isMounted`
 

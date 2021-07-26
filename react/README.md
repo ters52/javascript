@@ -73,7 +73,7 @@ This style guide is mostly based on the standards that are currently prevalent i
     import reservationCard from './ReservationCard';
 
     // good
-    import ReservationCard from './ReservationCard';
+    import { ReservationCard } from './ReservationCard';
 
     // bad
     const ReservationItem = <ReservationCard />;
@@ -149,7 +149,7 @@ This style guide is mostly based on the standards that are currently prevalent i
     });
 
     // good
-    export default class ReservationCard extends React.Component {
+    export const ReservationCard = () => {
     }
     ```
 

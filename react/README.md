@@ -708,6 +708,47 @@ We don’t recommend using indexes for keys if the order of items may change.
     );
     // P.S. do not forget about memo type, reselect uses simple (a === b) condition in memo function, it will not work for objects
     ```
+    
+    
+    # Saga
+    
+    - Use postfix `Saga` for each saga function. 
+
+    ```
+    // bad
+    function* updateUserProfile() {
+      // some code
+    }
+    
+    // good
+    function* updateUserProfileSaga() {
+      // some genious code
+    }
+    ```
+
+    - Send failure action everytime on catch 
+
+    ```
+    // bad
+    function* updateUserProfile() {
+      try {
+        // some code
+      } catch(err) {
+        console.error(err);
+      }
+    }
+    
+    // good
+    function* updateUserProfile() {
+      try {
+        // some code
+      } catch(err) {
+        console.error(err);
+        yield put(ACTION.failureAction)
+      }
+    }
+    ```
+    
 
 ## `isMounted`
 

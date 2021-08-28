@@ -635,7 +635,7 @@ We don’t recommend using indexes for keys if the order of items may change.
 
 ## Ordering
 
-  - Ordering for functional components:
+  - Ordering for functional components (not strict, just a template, feel free to use order you need in your situation):
 
   1. props spreading
   1. initiate dispatch
@@ -695,24 +695,35 @@ We don’t recommend using indexes for keys if the order of items may change.
   - Add selectors to get values from store
   - Use `reselect` to create a selector which use more than one store value and additional calculations. 
   - Split simple selectors and re-selectors into different files to avoid circular dependencies.
-  - Add additional memoization for re-selector if you need to pass params. 
-    > Why? Otherwise it will return new createSelector result everytime and reselect won't work as expected 
+  - Add additional prefix `select` for selector functions
+    > Why? Otherwise it will conflict with other functions and it will be hard to detect selectors by their name 
     ```jsx
     // bad
-    export const getOpenedSectionGroups = (section: CollectionsTreeSections) =>
-      createSelector([getOpenedSectionsGroups], (openedSectionsGroups) => openedSectionsGroups[section] || []);
+    export const getGroups = (state: AppState) => state.groups;
 
     // good
-    export const getOpenedSectionGroups = defaultMemoize((section: CollectionsTreeSections) =>
-      createSelector([getOpenedSectionsGroups], (openedSectionsGroups) => openedSectionsGroups[section] || [])
+    export const selectGroups = (state: AppState) => state.groups;
+    ```
+    
+   - Add additional memoization for re-selector if you need to pass params. 
+    > Why? Otherwise it will return new createSelector result everytime and reselect won't work as expected 
+   
+    ```jsx
+    // bad
+    export const selectOpenedSectionGroups = (section: CollectionsTreeSections) =>
+      createSelector([selectGroups], (groups) => groups.filter(({groupSection, isOpen}) => isOpen && groupSection === section))
+
+    // good
+    export const selectOpenedSectionGroups = defaultMemoize((section: CollectionsTreeSections) =>
+      createSelector([selectGroups], (groups) => groups.filter(({groupSection, isOpen}) => isOpen && groupSection === section))
     );
     // P.S. do not forget about memo type, reselect uses simple (a === b) condition in memo function, it will not work for objects
     ```
     
     
-    # Saga
+  # Saga
     
-    - Use postfix `Saga` for each saga function. 
+   - Use postfix `Saga` for each saga function. 
 
     ```
     // bad
@@ -726,7 +737,7 @@ We don’t recommend using indexes for keys if the order of items may change.
     }
     ```
 
-    - Send failure action everytime on catch 
+   - Send failure action everytime on catch 
 
     ```
     // bad
@@ -749,6 +760,33 @@ We don’t recommend using indexes for keys if the order of items may change.
     }
     ```
     
+    
+  # Actions
+  - Use `action` template function 
+  ```
+  export const toggleCollectionsGroup = (groupId: GUID, section: CollectionsTreeSections) =>
+  action(TOGGLE_COLLECTIONS_GROUP, { groupId, section });
+  ```
+  
+  - Use `createRequestTypes` when your action creator uses any middleware 
+  ```
+  export const CREATE_NEW_COLLECTIONS_GROUP = createRequestTypes('CREATE_NEW_COLLECTIONS_GROUP');
+  ```
+  
+  - Use `Action` postfix for action creators
+  > Why? Otherwise it will conflict with other functions and it will be hard to detect actions by their name 
+
+  ```
+  //bad 
+  export const UPDATE_USER = 'UPDATE_USER';
+  export const updateUser = (user: User) => action(UPDATE_USER, { user });
+  
+  // good
+  export const UPDATE_USER_ACTION = 'UPDATE_USER';
+  export const updateUserAction = (user: User) => action(UPDATE_USER, { user });
+  
+  ```
+    
 
 ## `isMounted`
 
@@ -758,21 +796,5 @@ We don’t recommend using indexes for keys if the order of items may change.
 
   [anti-pattern]: https://facebook.github.io/react/blog/2015/12/16/ismounted-antipattern.html
 
-## Translation
-
-  This JSX/React style guide is also available in other languages:
-
-  - ![cn](https://raw.githubusercontent.com/gosquared/flags/master/flags/flags/shiny/24/China.png) **Chinese (Simplified)**: [jhcccc/javascript](https://github.com/jhcccc/javascript/tree/master/react)
-  - ![tw](https://raw.githubusercontent.com/gosquared/flags/master/flags/flags/shiny/24/Taiwan.png) **Chinese (Traditional)**: [jigsawye/javascript](https://github.com/jigsawye/javascript/tree/master/react)
-  - ![es](https://raw.githubusercontent.com/gosquared/flags/master/flags/flags/shiny/24/Spain.png) **Español**: [agrcrobles/javascript](https://github.com/agrcrobles/javascript/tree/master/react)
-  - ![jp](https://raw.githubusercontent.com/gosquared/flags/master/flags/flags/shiny/24/Japan.png) **Japanese**: [mitsuruog/javascript-style-guide](https://github.com/mitsuruog/javascript-style-guide/tree/master/react)
-  - ![kr](https://raw.githubusercontent.com/gosquared/flags/master/flags/flags/shiny/24/South-Korea.png) **Korean**: [apple77y/javascript](https://github.com/apple77y/javascript/tree/master/react)
-  - ![pl](https://raw.githubusercontent.com/gosquared/flags/master/flags/flags/shiny/24/Poland.png) **Polish**: [pietraszekl/javascript](https://github.com/pietraszekl/javascript/tree/master/react)
-  - ![Br](https://raw.githubusercontent.com/gosquared/flags/master/flags/flags/shiny/24/Brazil.png) **Portuguese**: [ronal2do/javascript](https://github.com/ronal2do/airbnb-react-styleguide)
-  - ![ru](https://raw.githubusercontent.com/gosquared/flags/master/flags/flags/shiny/24/Russia.png) **Russian**: [leonidlebedev/javascript-airbnb](https://github.com/leonidlebedev/javascript-airbnb/tree/master/react)
-  - ![th](https://raw.githubusercontent.com/gosquared/flags/master/flags/flags/shiny/24/Thailand.png) **Thai**: [lvarayut/javascript-style-guide](https://github.com/lvarayut/javascript-style-guide/tree/master/react)
-  - ![tr](https://raw.githubusercontent.com/gosquared/flags/master/flags/flags/shiny/24/Turkey.png) **Turkish**: [alioguzhan/react-style-guide](https://github.com/alioguzhan/react-style-guide)
-  - ![ua](https://raw.githubusercontent.com/gosquared/flags/master/flags/flags/shiny/24/Ukraine.png) **Ukrainian**: [ivanzusko/javascript](https://github.com/ivanzusko/javascript/tree/master/react)
-  - ![vn](https://raw.githubusercontent.com/gosquared/flags/master/flags/flags/shiny/24/Vietnam.png) **Vietnam**: [uetcodecamp/jsx-style-guide](https://github.com/UETCodeCamp/jsx-style-guide)
 
 **[⬆ back to top](#table-of-contents)**

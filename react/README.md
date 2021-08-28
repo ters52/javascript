@@ -92,7 +92,7 @@ This style guide is mostly based on the standards that are currently prevalent i
     import { Footer } from './TableFooter/TableFooter';
 
     // good
-    import Footer from './Footer/Footer';
+    import { Footer } from './Footer/Footer';
     ```
 
   - **Higher-order Component Naming**: Use a composite of the higher-order component’s name and the passed-in component’s name as the `displayName` on the generated component. For example, the higher-order component `withFoo()`, when passed a component `Bar` should produce a component with a `displayName` of `withFoo(Bar)`.
